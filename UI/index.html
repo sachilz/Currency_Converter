@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currency Converter Client</title>
+  <!-- Tailwind CSS for simple, clean, and modern styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+  <div class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-100 w-full max-w-md border border-slate-100">
+    
+    <!-- Title -->
+    <div class="flex items-center gap-2 justify-center mb-6">
+      <i data-lucide="refresh-cw" class="w-6 h-6 text-blue-600 animate-spin-slow"></i>
+      <h2 class="text-2xl font-bold text-slate-800">Currency Converter</h2>
+    </div>
+
+    <!-- Amount Input -->
+    <div class="mb-4">
+      <label for="amount" class="block text-sm font-semibold text-slate-600 mb-1.5">Amount:</label>
+      <input type="number" id="amount" placeholder="e.g. 100" required value="100"
+        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition duration-200 text-slate-800 font-medium">
+    </div>
+
+    <!-- Currency Selection Group with Swap Button -->
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-9 items-end mb-6">
+      <!-- From Dropdown -->
+      <div class="sm:col-span-4">
+        <label for="fromCurrency" class="block text-sm font-semibold text-slate-600 mb-1.5">From:</label>
+        <select id="fromCurrency" class="w-full px-3 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition bg-white text-slate-800 font-medium cursor-pointer">
+          <option value="USD">USD</option>
+          <option value="LKR">LKR</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="INR">INR</option>
+        </select>
+      </div>
+
+      <!-- Interactive Swap Button -->
+      <div class="sm:col-span-1 flex justify-center py-2 sm:py-0">
+        <button onclick="swapCurrencies()" title="Swap Currencies"
+          class="p-2.5 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-600 active:scale-90 text-slate-500 transition duration-200 border border-slate-200/60">
+          <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- To Dropdown -->
+      <div class="sm:col-span-4">
+        <label for="toCurrency" class="block text-sm font-semibold text-slate-600 mb-1.5">To:</label>
+        <select id="toCurrency" class="w-full px-3 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition bg-white text-slate-800 font-medium cursor-pointer">
+          <option value="LKR">LKR</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="INR">INR</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Convert Action Button -->
+    <button onclick="convertCurrency()"
+      class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/15">
+      <i data-lucide="zap" class="w-4 h-4 fill-current"></i>
+      Convert
+    </button>
+
+    <!-- Interactive Output Box -->
+    <div class="mt-6">
+      <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Result Panel</div>
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60 text-sm font-mono text-slate-700 min-h-[80px] flex items-center justify-center text-center" id="outputArea">
+        Result will appear here...
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+
+    const CONVERT_URL = '/api/convert';
+    const WARNING_URL = '/api/warning-check';
+
+    // Simple offline exchange rates to fallback to if the API fails or is offline (perfect for live previews!)
+    const SIMULATED_RATES = {
+      USD: { USD: 1.0, LKR: 300.5, EUR: 0.92, GBP: 0.78, INR: 83.4 },
+      LKR: { USD: 0.0033, LKR: 1.0, EUR: 0.0031, GBP: 0.0026, INR: 0.28 },
+      EUR: { USD: 1.09, LKR: 326.6, EUR: 1.0, GBP: 0.85, INR: 90.7 },
+      GBP: { USD: 1.28, LKR: 385.2, EUR: 1.18, GBP: 1.0, INR: 106.9 },
+      INR: { USD: 0.012, LKR: 3.6, EUR: 0.011, GBP: 0.0093, INR: 1.0 }
+    };
+
+    // Quick swap function
+    function swapCurrencies() {
+      const fromSelect = document.getElementById('fromCurrency');
+      const toSelect = document.getElementById('toCurrency');
+      const temp = fromSelect.value;
+      fromSelect.value = toSelect.value;
+      toSelect.value = temp;
+    }
+
+    async function convertCurrency() {
+      const amountInput = document.getElementById('amount').value;
+      const fromInput = document.getElementById('fromCurrency').value;
+      const toInput = document.getElementById('toCurrency').value;
+      const outputArea = document.getElementById('outputArea');
+
+      if (!amountInput || isNaN(amountInput) || parseFloat(amountInput) <= 0) {
+        outputArea.innerHTML = `<span class="text-rose-500 font-semibold">⚠️ Please enter a valid positive numeric amount.</span>`;
+        return;
+      }
+
+      outputArea.innerHTML = `
+        <div class="flex flex-col items-center gap-2">
+          <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-slate-500">Contacting server...</span>
+        </div>
+      `;
+
+      try {
+        // 1. Perform the conversion
+        const response = await fetch(`${CONVERT_URL}?amount=${amountInput}&from=${fromInput}&to=${toInput}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server Error: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        let resultText =
+          `<div class="text-left space-y-1">` +
+          `<div class="text-emerald-600 font-bold text-center border-b border-slate-200 pb-2 mb-2">🎉 Conversion Successful!</div>` +
+          `<div><strong class="text-slate-500">Transaction ID:</strong> <span class="text-slate-800">${data.id}</span></div>` +
+          `<div><strong class="text-slate-500">Input Source:</strong> <span class="text-slate-800">${data.inputAmount} ${data.inputCurrency}</span></div>` +
+          `<div><strong class="text-slate-500">Settlement:</strong> <span class="text-slate-800 font-bold">${data.outputAmount.toFixed(2)} ${data.outputCurrency}</span></div>` +
+          `<div><strong class="text-slate-500">Timestamp:</strong> <span class="text-slate-400 text-xs">${data.timestamp}</span></div>`;
+
+        // 2. Also check for a transaction warning on the input amount/currency
+        try {
+          const warningResponse = await fetch(`${WARNING_URL}?amount=${amountInput}&currency=${fromInput}`);
+          if (warningResponse.ok) {
+            const warningText = await warningResponse.text();
+            if (warningText.startsWith("Warning:")) {
+              resultText += `
+                <div class="mt-3 p-2.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs flex items-start gap-1.5 animate-pulse">
+                  <span>⚠️</span>
+                  <span>${warningText}</span>
+                </div>`;
+            }
+          }
+        } catch (warnErr) {
+          console.warn("Warning check failed:", warnErr.message);
+        }
+
+        resultText += `</div>`;
+        outputArea.innerHTML = resultText;
+
+      } catch (error) {
+        // --- PREVIEW MODE FALLBACK ---
+        // If fetch fails (because we are in the live preview mode), run simulated calculation 
+        // so the user can see how beautiful the result output looks immediately!
+        console.warn("API Offline or Dev sandbox. Running local high-fidelity simulation fall-back.");
+
+        setTimeout(() => {
+          const simulatedRate = SIMULATED_RATES[fromInput]?.[toInput] || 1;
+          const calculatedOutput = parseFloat(amountInput) * simulatedRate;
+          const fakeTxId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
+          const currentTimestampUtc = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+
+          let resultText = `
+            <div class="text-left w-full space-y-1">
+              <div class="text-emerald-600 font-bold text-center border-b border-slate-200/80 pb-2 mb-2">🎉 Success (Simulated)</div>
+              <div><strong class="text-slate-400">ID:</strong> <span class="text-slate-800 font-semibold">${fakeTxId}</span></div>
+              <div><strong class="text-slate-400">Input:</strong> <span class="text-slate-800">${parseFloat(amountInput).toLocaleString()} ${fromInput}</span></div>
+              <div><strong class="text-slate-400">Result:</strong> <span class="text-blue-600 font-bold text-base">${calculatedOutput.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${toInput}</span></div>
+              <div class="text-[11px] text-slate-400 pt-1"><strong class="text-slate-400">Timestamp:</strong> ${currentTimestampUtc}</div>
+          `;
+
+          // Trigger simulated warning if amount is large
+          if (parseFloat(amountInput) >= 5000) {
+            resultText += `
+              <div class="mt-3 p-2.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs flex items-start gap-1.5">
+                <span>⚠️</span>
+                <span>Warning: Large transaction flagged for system logging.</span>
+              </div>`;
+          }
+
+          resultText += `</div>`;
+          outputArea.innerHTML = resultText;
+        }, 400); // Small realistic delay
+      }
+    }
+  </script>
+</body>
+</html>
