@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  springboot-api:
+    build: ./
+    container_name: springboot-api
+    ports:
+      - "8084:8084"
+    depends_on:
+      - mongodb
+
+  node-client:
+    build: ./UI
+    container_name: node-client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - springboot-api
+
+volumes:
+  mongo-data:

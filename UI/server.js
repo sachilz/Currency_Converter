@@ -11,7 +11,7 @@ app.post('/api/convert', async (req, res) => {
     const { amount, from, to } = req.query;
     try {
         const response = await fetch(
-            `http://localhost:8084/api/currencies/convert?amount=${amount}&from=${from}&to=${to}`,
+            `http://springboot-api:8084/api/currencies/convert?amount=${amount}&from=${from}&to=${to}`,
             {
                 method: 'POST',
                 headers: {
@@ -36,14 +36,14 @@ app.get('/api/warning-check', async (req, res) => {
     const { amount, currency } = req.query;
     try {
         const response = await fetch(
-            `http://localhost:8084/api/currencies/warning-check?amount=${amount}&currency=${currency}`
+            `http://springboot-api:8084/api/currencies/warning-check?amount=${amount}&currency=${currency}`
         );
 
         if (!response.ok) {
             return res.status(response.status).json({ error: 'Failed to communicate with Spring Boot' });
         }
 
-        const data = await response.text(); // this endpoint returns plain text, not JSON
+        const data = await response.text();
         res.send(data);
     } catch (error) {
         res.status(500).json({ error: error.message });
