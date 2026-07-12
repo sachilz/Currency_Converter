@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface ApiKeyRepository extends MongoRepository<ApiKey, String> {
     Optional<ApiKey> findByKeyValueAndActiveTrue(String keyValue);
+    Optional<ApiKey> findByKeyValue(String keyValue);
 }

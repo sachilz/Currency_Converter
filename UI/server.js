@@ -11,7 +11,7 @@ app.post('/api/convert', async (req, res) => {
     const { amount, from, to } = req.query;
     try {
         const response = await fetch(
-            `http://springboot-api:8084/api/currencies/convert?amount=${amount}&from=${from}&to=${to}`,
+            `http://localhost:8084/api/currencies/convert?amount=${amount}&from=${from}&to=${to}`,
             {
                 method: 'POST',
                 headers: {
@@ -36,7 +36,7 @@ app.get('/api/warning-check', async (req, res) => {
     const { amount, currency } = req.query;
     try {
         const response = await fetch(
-            `http://springboot-api:8084/api/currencies/warning-check?amount=${amount}&currency=${currency}`
+            `http://localhost:8084/api/currencies/warning-check?amount=${amount}&currency=${currency}`
         );
 
         if (!response.ok) {
