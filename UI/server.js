@@ -3,6 +3,7 @@ const path = require('path');
 
 const app = express();
 const PORT = 3000;
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8084';
 
 app.use(express.static(__dirname));
 app.use(express.json());
@@ -11,7 +12,7 @@ app.post('/api/convert', async (req, res) => {
     const { amount, from, to } = req.query;
     try {
         const response = await fetch(
-            `http://localhost:8084/api/currencies/convert?amount=${amount}&from=${from}&to=${to}`,
+            `${API_BASE_URL}/api/currencies/convert?amount=${amount}&from=${from}&to=${to}`,
             {
                 method: 'POST',
                 headers: {
@@ -36,7 +37,7 @@ app.get('/api/warning-check', async (req, res) => {
     const { amount, currency } = req.query;
     try {
         const response = await fetch(
-            `http://localhost:8084/api/currencies/warning-check?amount=${amount}&currency=${currency}`
+            `${API_BASE_URL}/api/currencies/warning-check?amount=${amount}&currency=${currency}`
         );
 
         if (!response.ok) {
