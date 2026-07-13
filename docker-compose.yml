@@ -1,7 +1,6 @@
 services:
   mongodb:
     image: mongo:7
-    container_name: mongodb
     ports:
       - "27017:27017"
     volumes:
@@ -9,7 +8,6 @@ services:
 
   springboot-api:
     build: ./
-    container_name: springboot-api
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/currency_db
     expose:
@@ -19,7 +17,6 @@ services:
 
   node-client:
     build: ./UI
-    container_name: node-client
     environment:
       - API_BASE_URL=http://springboot-api:8084
     ports:
