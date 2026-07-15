@@ -10,6 +10,8 @@ services:
     build: ./
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/currency_db
+    ports:
+      - "8084:8084"
     expose:
       - "8084"
     depends_on:
