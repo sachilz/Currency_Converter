@@ -1,209 +1,707 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Currency Converter Client</title>
-  <!-- Tailwind CSS for simple, clean, and modern styling -->
+  <title>ApexConvert — Converter & Ledger</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              900: '#4c1d95',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  
   <style>
     body {
       font-family: 'Inter', sans-serif;
     }
+    .heading-font {
+      font-family: 'Outfit', sans-serif;
+    }
+    /* Scrollbar Aesthetics */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #2d1b4e;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e1;
+    }
   </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
 
-  <div class="bg-white p-8 rounded-2xl shadow-xl shadow-slate-100 w-full max-w-md border border-slate-100">
-    
-    <!-- Title -->
-    <div class="flex items-center gap-2 justify-center mb-6">
-      <i data-lucide="refresh-cw" class="w-6 h-6 text-blue-600 animate-spin-slow"></i>
-      <h2 class="text-2xl font-bold text-slate-800">Currency Converter</h2>
-    </div>
+<body class="bg-slate-50 dark:bg-[#0b0813] text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
 
-    <!-- Amount Input -->
-    <div class="mb-4">
-      <label for="amount" class="block text-sm font-semibold text-slate-600 mb-1.5">Amount:</label>
-      <input type="number" id="amount" placeholder="e.g. 100" required value="100"
-        class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition duration-200 text-slate-800 font-medium">
-    </div>
-
-    <!-- Currency Selection Group with Swap Button -->
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-9 items-end mb-6">
-      <!-- From Dropdown -->
-      <div class="sm:col-span-4">
-        <label for="fromCurrency" class="block text-sm font-semibold text-slate-600 mb-1.5">From:</label>
-        <select id="fromCurrency" class="w-full px-3 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition bg-white text-slate-800 font-medium cursor-pointer">
-          <option value="USD">USD</option>
-          <option value="LKR">LKR</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-          <option value="INR">INR</option>
-        </select>
+  <header class="border-b border-slate-200/80 dark:border-purple-950/40 bg-white/70 dark:bg-[#0b0813]/70 backdrop-blur-md sticky top-0 z-40 transition-colors">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="p-2 bg-gradient-to-tr from-brand-600 to-indigo-500 rounded-xl shadow-lg shadow-brand-500/20 text-white">
+          <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="heading-font text-lg font-bold tracking-tight bg-gradient-to-r from-brand-600 to-indigo-500 dark:from-brand-400 dark:to-indigo-300 bg-clip-text text-transparent">ApexConvert</span>
+          <span class="text-[9px] block font-mono text-slate-400 dark:text-purple-400/60 -mt-1 uppercase tracking-widest">Lite Terminal</span>
+        </div>
       </div>
 
-      <!-- Interactive Swap Button -->
-      <div class="sm:col-span-1 flex justify-center py-2 sm:py-0">
-        <button onclick="swapCurrencies()" title="Swap Currencies"
-          class="p-2.5 rounded-full bg-slate-100 hover:bg-blue-50 hover:text-blue-600 active:scale-90 text-slate-500 transition duration-200 border border-slate-200/60">
-          <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+      <!-- Theme & Sound Toolbar controls -->
+      <div class="flex items-center gap-1.5">
+        <button id="soundToggle" onclick="toggleSound()" title="Toggle Sound Feedback"
+          class="p-2 rounded-xl border border-slate-200/60 dark:border-purple-950/50 bg-white dark:bg-[#130f24] text-slate-500 hover:text-brand-600 dark:text-purple-300 dark:hover:text-brand-400 transition-all active:scale-95">
+          <i id="soundIcon" data-lucide="volume-2" class="w-4 h-4"></i>
+        </button>
+
+        <button onclick="toggleTheme()" title="Toggle Interface Mode"
+          class="p-2 rounded-xl border border-slate-200/60 dark:border-purple-950/50 bg-white dark:bg-[#130f24] text-slate-500 hover:text-brand-600 dark:text-purple-300 dark:hover:text-brand-400 transition-all active:scale-95">
+          <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
         </button>
       </div>
-
-      <!-- To Dropdown -->
-      <div class="sm:col-span-4">
-        <label for="toCurrency" class="block text-sm font-semibold text-slate-600 mb-1.5">To:</label>
-        <select id="toCurrency" class="w-full px-3 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition bg-white text-slate-800 font-medium cursor-pointer">
-          <option value="LKR">LKR</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-          <option value="INR">INR</option>
-        </select>
-      </div>
     </div>
+  </header>
 
-    <!-- Convert Action Button -->
-    <button onclick="convertCurrency()"
-      class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/15">
-      <i data-lucide="zap" class="w-4 h-4 fill-current"></i>
-      Convert
-    </button>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left Card: The Converter Component -->
+      <div class="lg:col-span-7">
+        <div class="bg-white dark:bg-[#120e25] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-100 dark:shadow-none border border-slate-100 dark:border-purple-950/30 relative overflow-hidden">
+          
+          <!-- Abstract Background Decor -->
+          <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Interactive Output Box -->
-    <div class="mt-6">
-      <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Result Panel</div>
-      <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/60 text-sm font-mono text-slate-700 min-h-[80px] flex items-center justify-center text-center" id="outputArea">
-        Result will appear here...
+          <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-purple-950/20">
+            <div class="flex items-center gap-2">
+              <i data-lucide="coins" class="w-5 h-5 text-brand-500"></i>
+              <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 heading-font">Global Exchange</h2>
+            </div>
+            
+            <button onclick="resetInputs()" class="text-xs text-slate-400 hover:text-brand-600 dark:text-purple-400 dark:hover:text-brand-300 flex items-center gap-1 transition py-1 px-2 hover:bg-slate-50 dark:hover:bg-[#1b1535] rounded-lg">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+            </button>
+          </div>
+
+          <div class="mb-5">
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="loadFastPair('USD', 'LKR')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
+                🇺🇸 USD ➔ 🇱🇰 LKR
+              </button>
+              <button onclick="loadFastPair('EUR', 'USD')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
+                🇪🇺 EUR ➔ 🇺🇸 USD
+              </button>
+              <button onclick="loadFastPair('GBP', 'EUR')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
+                🇬🇧 GBP ➔ 🇪🇺 EUR
+              </button>
+              <button onclick="loadFastPair('USD', 'INR')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
+                🇺🇸 USD ➔ 🇮🇳 INR
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label for="amount" class="block text-xs font-bold text-slate-500 dark:text-purple-400/80 uppercase tracking-wider mb-1.5">Amount to Exchange</label>
+              <div class="relative rounded-xl shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-purple-400">
+                  <span id="amountSymbol" class="font-mono text-base font-semibold">$</span>
+                </div>
+                <input type="number" id="amount" placeholder="Enter amount..." required value="100" min="0.01" step="any" oninput="handleAmountInput()"
+                  class="w-full pl-9 pr-14 py-3.5 bg-slate-50/50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition duration-200 text-slate-800 dark:text-white font-semibold text-lg">
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                  <span id="fromBadge" class="text-xs font-bold bg-slate-200 dark:bg-[#2c2250] text-slate-600 dark:text-purple-200 px-2.5 py-1 rounded-md">USD</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Double dropdown list selectors and swap controls -->
+            <div class="grid grid-cols-1 md:grid-cols-9 gap-3 items-center pt-2">
+              <div class="md:col-span-4 relative">
+                <label for="fromCurrency" class="block text-xs font-bold text-slate-500 dark:text-purple-400/80 uppercase tracking-wider mb-1.5">Source Currency</label>
+                <div class="relative">
+                  <select id="fromCurrency" onchange="handleCurrencyChange()"
+                    class="w-full px-4 py-3 pl-11 bg-slate-50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-slate-800 dark:text-white font-semibold cursor-pointer appearance-none transition">
+                    <!-- Loaded dynamically via JS -->
+                  </select>
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <span id="fromFlag" class="text-lg">🇺🇸</span>
+                  </div>
+                  <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-purple-400">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </div>
+                </div>
+              </div>
+
+              <div class="md:col-span-1 flex justify-center py-1 md:pt-5">
+                <button onclick="swapCurrencies()" title="Swap Currencies"
+                  class="p-2.5 rounded-xl bg-brand-50 dark:bg-[#251d49] hover:bg-brand-100 dark:hover:bg-[#2f255c] text-brand-600 dark:text-purple-300 active:scale-90 hover:rotate-180 transition-all duration-300 border border-brand-100 dark:border-purple-950/50">
+                  <i data-lucide="arrow-left-right" class="w-4 h-4 md:rotate-90"></i>
+                </button>
+              </div>
+
+              <div class="md:col-span-4 relative">
+                <label for="toCurrency" class="block text-xs font-bold text-slate-500 dark:text-purple-400/80 uppercase tracking-wider mb-1.5">Target Currency</label>
+                <div class="relative">
+                  <select id="toCurrency" onchange="handleCurrencyChange()"
+                    class="w-full px-4 py-3 pl-11 bg-slate-50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-slate-800 dark:text-white font-semibold cursor-pointer appearance-none transition">
+                    <!-- Loaded dynamically via JS -->
+                  </select>
+                  <div class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <span id="toFlag" class="text-lg">🇱🇰</span>
+                  </div>
+                  <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-purple-400">
+                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 bg-gradient-to-r from-slate-50 to-indigo-50/10 dark:from-[#1b1535]/50 dark:to-transparent p-5 rounded-2xl border border-slate-100 dark:border-purple-950/40">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-xs font-bold text-slate-400 dark:text-purple-400/60 uppercase tracking-widest">Calculated Outcome</span>
+              <span id="rateLabel" class="text-[10px] bg-indigo-50 dark:bg-[#2c2250] text-indigo-600 dark:text-purple-300 px-2 py-0.5 rounded-full font-mono font-semibold">1 FROM = X TO</span>
+            </div>
+            
+            <div id="outputArea" class="flex flex-col gap-1 min-h-[60px] justify-center">
+              <!-- Dynamically rendered calculation result -->
+            </div>
+          </div>
+
+          <!-- CTA to save results into local history -->
+          <div class="mt-6">
+            <button onclick="commitAndSaveConversion()"
+              class="w-full bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              Save & Log to History
+            </button>
+          </div>
+
+        </div>
       </div>
-    </div>
 
-  </div>
+      <div class="lg:col-span-5">
+        <div class="bg-white dark:bg-[#120e25] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-100 dark:shadow-none border border-slate-100 dark:border-purple-950/30">
+          
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 dark:border-purple-950/20">
+            <div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="history" class="w-5 h-5 text-brand-500"></i>
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 heading-font">Transaction Ledger</h3>
+              </div>
+              <p class="text-xs text-slate-400 dark:text-purple-400/50 mt-0.5" id="historyCounter">0 saved records</p>
+            </div>
+            
+            <button onclick="clearAllHistory()" title="Clear Entire Ledger"
+              class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-all">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- History Filter Box -->
+          <div class="mb-4 relative">
+            <input type="text" id="historySearch" oninput="filterHistory()" placeholder="Search history records..."
+              class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-xs text-slate-600 dark:text-purple-300">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-purple-400/60 pointer-events-none">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Stored list ledger container -->
+          <div class="max-h-[380px] overflow-y-auto space-y-2.5 pr-1" id="historyList">
+            <!-- Populated via JavaScript dynamically -->
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
 
   <script>
-    // Initialize icons
-    lucide.createIcons();
+    let soundEnabled = true;
+
+    // Rich currency definitions, flags, and offline fallback conversion index (to USD equivalent)
+    const CURRENCY_METADATA = {
+      USD: { flag: '🇺🇸', name: 'United States Dollar', symbol: '$', rateToUSD: 1.0 },
+      LKR: { flag: '🇱🇰', name: 'Sri Lankan Rupee', symbol: 'Rs', rateToUSD: 300.5 },
+      EUR: { flag: '🇪🇺', name: 'Euro', symbol: '€', rateToUSD: 0.92 },
+      GBP: { flag: '🇬🇧', name: 'British Pound Sterling', symbol: '£', rateToUSD: 0.78 },
+      INR: { flag: '🇮🇳', name: 'Indian Rupee', symbol: '₹', rateToUSD: 83.4 },
+      JPY: { flag: '🇯🇵', name: 'Japanese Yen', symbol: '¥', rateToUSD: 155.2 },
+      AUD: { flag: '🇦🇺', name: 'Australian Dollar', symbol: 'A$', rateToUSD: 1.51 },
+      CAD: { flag: '🇨🇦', name: 'Canadian Dollar', symbol: 'C$', rateToUSD: 1.37 },
+      SGD: { flag: '🇸🇬', name: 'Singapore Dollar', symbol: 'S$', rateToUSD: 1.35 },
+      CNY: { flag: '🇨🇳', name: 'Chinese Yuan', symbol: '¥', rateToUSD: 7.25 }
+    };
 
     const CONVERT_URL = '/api/convert';
     const WARNING_URL = '/api/warning-check';
 
-    // Simple offline exchange rates to fallback to if the API fails or is offline (perfect for live previews!)
-    const SIMULATED_RATES = {
-      USD: { USD: 1.0, LKR: 300.5, EUR: 0.92, GBP: 0.78, INR: 83.4 },
-      LKR: { USD: 0.0033, LKR: 1.0, EUR: 0.0031, GBP: 0.0026, INR: 0.28 },
-      EUR: { USD: 1.09, LKR: 326.6, EUR: 1.0, GBP: 0.85, INR: 90.7 },
-      GBP: { USD: 1.28, LKR: 385.2, EUR: 1.18, GBP: 1.0, INR: 106.9 },
-      INR: { USD: 0.012, LKR: 3.6, EUR: 0.011, GBP: 0.0093, INR: 1.0 }
+    // Interactive audio synthesizer using Web Audio API
+    function playSound(type) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        if (type === 'click') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(420, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.06, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.12);
+        } else if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime); 
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); 
+          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); 
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        } else if (type === 'delete') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.15);
+        }
+      } catch (e) {
+        console.warn('Audio output bypassed.', e);
+      }
+    }
+
+    window.onload = function() {
+      lucide.createIcons();
+      populateDropdowns();
+      initializeTheme();
+      renderCalculation();
+      renderHistory();
     };
 
-    // Quick swap function
+    function populateDropdowns() {
+      const fromSelect = document.getElementById('fromCurrency');
+      const toSelect = document.getElementById('toCurrency');
+      
+      fromSelect.innerHTML = '';
+      toSelect.innerHTML = '';
+
+      Object.keys(CURRENCY_METADATA).forEach(key => {
+        const optionFrom = document.createElement('option');
+        optionFrom.value = key;
+        optionFrom.innerHTML = `${key} — ${CURRENCY_METADATA[key].name}`;
+        fromSelect.appendChild(optionFrom);
+
+        const optionTo = document.createElement('option');
+        optionTo.value = key;
+        optionTo.innerHTML = `${key} — ${CURRENCY_METADATA[key].name}`;
+        toSelect.appendChild(optionTo);
+      });
+
+      // Standard initial selection setup
+      fromSelect.value = 'USD';
+      toSelect.value = 'LKR';
+      
+      updateSelectionBadges();
+    }
+
+    // Toggle custom sound indicators
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const iconElement = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        iconElement.setAttribute('data-lucide', 'volume-2');
+        showToast('Tactile Sound Alerts Enabled', 'info');
+        playSound('click');
+      } else {
+        iconElement.setAttribute('data-lucide', 'volume-x');
+        showToast('Tactile Sound Muted', 'info');
+      }
+      lucide.createIcons();
+    }
+
+    // Theme Managers
+    function toggleTheme() {
+      playSound('click');
+      const doc = document.documentElement;
+      const themeIcon = document.getElementById('themeIcon');
+      if (doc.classList.contains('dark')) {
+        doc.classList.remove('dark');
+        themeIcon.setAttribute('data-lucide', 'moon');
+        localStorage.setItem('theme', 'light');
+        showToast('Vibrant Light UI Mode Active', 'info');
+      } else {
+        doc.classList.add('dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+        localStorage.setItem('theme', 'dark');
+        showToast('Deep Dark UI Mode Active', 'info');
+      }
+      lucide.createIcons();
+    }
+
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const themeIcon = document.getElementById('themeIcon');
+      const doc = document.documentElement;
+      
+      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        doc.classList.add('dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+      } else {
+        doc.classList.remove('dark');
+        themeIcon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
+    }
+
+    function updateSelectionBadges() {
+      const fromVal = document.getElementById('fromCurrency').value;
+      const toVal = document.getElementById('toCurrency').value;
+      
+      document.getElementById('fromFlag').innerText = CURRENCY_METADATA[fromVal].flag;
+      document.getElementById('toFlag').innerText = CURRENCY_METADATA[toVal].flag;
+      document.getElementById('amountSymbol').innerText = CURRENCY_METADATA[fromVal].symbol;
+      document.getElementById('fromBadge').innerText = fromVal;
+    }
+
+    function handleAmountInput() {
+      renderCalculation();
+    }
+
+    function handleCurrencyChange() {
+      playSound('click');
+      updateSelectionBadges();
+      renderCalculation();
+    }
+
     function swapCurrencies() {
+      playSound('click');
       const fromSelect = document.getElementById('fromCurrency');
       const toSelect = document.getElementById('toCurrency');
       const temp = fromSelect.value;
       fromSelect.value = toSelect.value;
       toSelect.value = temp;
+
+      updateSelectionBadges();
+      renderCalculation();
     }
 
-    async function convertCurrency() {
-      const amountInput = document.getElementById('amount').value;
-      const fromInput = document.getElementById('fromCurrency').value;
-      const toInput = document.getElementById('toCurrency').value;
+    function calculateCrossRate(from, to, amount) {
+      if (from === to) return { rate: 1.0, result: amount };
+      
+      const fromToUSD = CURRENCY_METADATA[from].rateToUSD;
+      const toToUSD = CURRENCY_METADATA[to].rateToUSD;
+
+      const amountInUSD = amount / fromToUSD;
+      const targetVal = amountInUSD * toToUSD;
+      const crossRate = toToUSD / fromToUSD;
+
+      return {
+        rate: crossRate,
+        result: targetVal
+      };
+    }
+
+    function resetInputs() {
+      playSound('click');
+      document.getElementById('amount').value = "100";
+      document.getElementById('fromCurrency').value = "USD";
+      document.getElementById('toCurrency').value = "LKR";
+      updateSelectionBadges();
+      renderCalculation();
+      showToast('Converter parameters reset', 'info');
+    }
+
+    function loadFastPair(from, to) {
+      playSound('click');
+      document.getElementById('fromCurrency').value = from;
+      document.getElementById('toCurrency').value = to;
+      updateSelectionBadges();
+      renderCalculation();
+    }
+
+    function renderCalculation() {
+      const amountInput = parseFloat(document.getElementById('amount').value);
+      const fromVal = document.getElementById('fromCurrency').value;
+      const toVal = document.getElementById('toCurrency').value;
       const outputArea = document.getElementById('outputArea');
 
-      if (!amountInput || isNaN(amountInput) || parseFloat(amountInput) <= 0) {
-        outputArea.innerHTML = `<span class="text-rose-500 font-semibold">⚠️ Please enter a valid positive numeric amount.</span>`;
+      if (isNaN(amountInput) || amountInput <= 0) {
+        outputArea.innerHTML = `
+          <div class="text-rose-500 font-semibold flex items-center gap-2 justify-center text-xs">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            <span>Please input a positive non-zero numeric amount.</span>
+          </div>`;
+        lucide.createIcons();
         return;
       }
 
+      const calc = calculateCrossRate(fromVal, toVal, amountInput);
+      
+      const formattedAmount = amountInput.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formattedResult = calc.result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      
+      document.getElementById('rateLabel').innerText = `1 ${fromVal} = ${calc.rate.toFixed(4)} ${toVal}`;
+
       outputArea.innerHTML = `
-        <div class="flex flex-col items-center gap-2">
-          <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-slate-500">Contacting server...</span>
+        <div class="text-slate-400 dark:text-purple-400/50 text-[10px] font-bold uppercase tracking-wider">${formattedAmount} ${fromVal} equals</div>
+        <div class="text-xl md:text-2xl font-extrabold text-brand-600 dark:text-brand-400 tracking-tight heading-font">
+          ${CURRENCY_METADATA[toVal].symbol} ${formattedResult} <span class="text-sm font-bold text-slate-400 dark:text-purple-400/50 ml-1">${toVal}</span>
         </div>
       `;
 
+      // Big Volume Flag dynamic alert check
+      const checkInUSD = amountInput / CURRENCY_METADATA[fromVal].rateToUSD;
+      if (checkInUSD >= 5000) {
+        outputArea.innerHTML += `
+          <div class="mt-2.5 p-2 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] flex items-center gap-1.5 font-medium">
+            <i data-lucide="shield-alert" class="w-3.5 h-3.5 flex-shrink-0"></i>
+            <span>Compliancy threshold warning: Transaction exceeds 5K USD equivalent limit.</span>
+          </div>
+        `;
+        lucide.createIcons();
+      }
+    }
+
+    function getStoredHistory() {
+      const items = localStorage.getItem('apex_lite_history');
+      return items ? JSON.parse(items) : [];
+    }
+
+    function saveStoredHistory(list) {
+      localStorage.setItem('apex_lite_history', JSON.stringify(list));
+    }
+
+    // Log the transaction values
+    async function commitAndSaveConversion() {
+      const amountInput = parseFloat(document.getElementById('amount').value);
+      const fromVal = document.getElementById('fromCurrency').value;
+      const toVal = document.getElementById('toCurrency').value;
+
+      if (isNaN(amountInput) || amountInput <= 0) {
+        showToast('Please provide a valid conversion target', 'warning');
+        return;
+      }
+
+      const calc = calculateCrossRate(fromVal, toVal, amountInput);
+      
+      let systemId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
+      let timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+      // Live Fetch/Simulator bridge
       try {
-        // 1. Perform the conversion
-        const response = await fetch(`${CONVERT_URL}?amount=${amountInput}&from=${fromInput}&to=${toInput}`, {
+        const res = await fetch(`${CONVERT_URL}?amount=${amountInput}&from=${fromVal}&to=${toVal}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
-
-        if (!response.ok) {
-          throw new Error(`Server Error: ${response.status} - ${response.statusText}`);
+        if (res.ok) {
+          const apiResponse = await res.json();
+          systemId = apiResponse.id || systemId;
+          timestamp = apiResponse.timestamp || timestamp;
         }
-
-        const data = await response.json();
-
-        let resultText =
-          `<div class="text-left space-y-1">` +
-          `<div class="text-emerald-600 font-bold text-center border-b border-slate-200 pb-2 mb-2">🎉 Conversion Successful!</div>` +
-          `<div><strong class="text-slate-500">Transaction ID:</strong> <span class="text-slate-800">${data.id}</span></div>` +
-          `<div><strong class="text-slate-500">Input Source:</strong> <span class="text-slate-800">${data.inputAmount} ${data.inputCurrency}</span></div>` +
-          `<div><strong class="text-slate-500">Settlement:</strong> <span class="text-slate-800 font-bold">${data.outputAmount.toFixed(2)} ${data.outputCurrency}</span></div>` +
-          `<div><strong class="text-slate-500">Timestamp:</strong> <span class="text-slate-400 text-xs">${data.timestamp}</span></div>`;
-
-        // 2. Also check for a transaction warning on the input amount/currency
-        try {
-          const warningResponse = await fetch(`${WARNING_URL}?amount=${amountInput}&currency=${fromInput}`);
-          if (warningResponse.ok) {
-            const warningText = await warningResponse.text();
-            if (warningText.startsWith("Warning:")) {
-              resultText += `
-                <div class="mt-3 p-2.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs flex items-start gap-1.5 animate-pulse">
-                  <span>⚠️</span>
-                  <span>${warningText}</span>
-                </div>`;
-            }
-          }
-        } catch (warnErr) {
-          console.warn("Warning check failed:", warnErr.message);
-        }
-
-        resultText += `</div>`;
-        outputArea.innerHTML = resultText;
-
-      } catch (error) {
-        // --- PREVIEW MODE FALLBACK ---
-        // If fetch fails (because we are in the live preview mode), run simulated calculation 
-        // so the user can see how beautiful the result output looks immediately!
-        console.warn("API Offline or Dev sandbox. Running local high-fidelity simulation fall-back.");
-
-        setTimeout(() => {
-          const simulatedRate = SIMULATED_RATES[fromInput]?.[toInput] || 1;
-          const calculatedOutput = parseFloat(amountInput) * simulatedRate;
-          const fakeTxId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
-          const currentTimestampUtc = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-
-          let resultText = `
-            <div class="text-left w-full space-y-1">
-              <div class="text-emerald-600 font-bold text-center border-b border-slate-200/80 pb-2 mb-2">🎉 Success (Simulated)</div>
-              <div><strong class="text-slate-400">ID:</strong> <span class="text-slate-800 font-semibold">${fakeTxId}</span></div>
-              <div><strong class="text-slate-400">Input:</strong> <span class="text-slate-800">${parseFloat(amountInput).toLocaleString()} ${fromInput}</span></div>
-              <div><strong class="text-slate-400">Result:</strong> <span class="text-blue-600 font-bold text-base">${calculatedOutput.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${toInput}</span></div>
-              <div class="text-[11px] text-slate-400 pt-1"><strong class="text-slate-400">Timestamp:</strong> ${currentTimestampUtc}</div>
-          `;
-
-          // Trigger simulated warning if amount is large
-          if (parseFloat(amountInput) >= 5000) {
-            resultText += `
-              <div class="mt-3 p-2.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-xs flex items-start gap-1.5">
-                <span>⚠️</span>
-                <span>Warning: Large transaction flagged for system logging.</span>
-              </div>`;
-          }
-
-          resultText += `</div>`;
-          outputArea.innerHTML = resultText;
-        }, 400); // Small realistic delay
+      } catch (err) {
+        // Safe interactive fallback
+        console.warn("Dev mode fallback active.");
       }
+
+      const currentList = getStoredHistory();
+      const newItem = {
+        id: systemId,
+        from: fromVal,
+        to: toVal,
+        amount: amountInput,
+        result: calc.result,
+        rate: calc.rate,
+        timestamp: timestamp
+      };
+
+      currentList.unshift(newItem);
+      saveStoredHistory(currentList);
+      
+      playSound('success');
+      showToast(`Logged successfully to ledger!`, 'success');
+      
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = getStoredHistory();
+      const container = document.getElementById('historyList');
+      const counterLabel = document.getElementById('historyCounter');
+      
+      counterLabel.innerText = `${list.length} saved transaction entries`;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-slate-400 dark:text-purple-400/40">
+            <div class="w-10 h-10 bg-slate-50 dark:bg-[#1b1535] rounded-full flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="database-backup" class="w-5 h-5 text-slate-300 dark:text-purple-400/40"></i>
+            </div>
+            <p class="text-xs font-medium">No recorded transactions.</p>
+            <p class="text-[10px] text-slate-400/80 dark:text-purple-400/30 mt-0.5">Use the save button to log conversions here.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      let innerHTML = '';
+      list.forEach((item, index) => {
+        const fromSymbol = CURRENCY_METADATA[item.from]?.symbol || '';
+        const toSymbol = CURRENCY_METADATA[item.to]?.symbol || '';
+
+        innerHTML += `
+          <div class="p-3 bg-slate-50 hover:bg-slate-100/50 dark:bg-[#1a1433] dark:hover:bg-[#20193e] border border-slate-100 dark:border-purple-950/40 rounded-xl flex flex-col justify-between gap-1.5 group transition-all">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-[9px] bg-slate-200/50 dark:bg-[#2a204e] text-slate-500 dark:text-purple-300 px-1.5 py-0.5 rounded font-bold">${item.id}</span>
+              <span class="text-[9px] text-slate-400 dark:text-purple-400/50">${item.timestamp}</span>
+            </div>
+            
+            <div class="flex items-center justify-between gap-2">
+              <div class="cursor-pointer flex-1" onclick="restoreHistoryItem(${index})" title="Click to load back into converter">
+                <div class="text-xs font-bold text-slate-700 dark:text-purple-100">
+                  ${fromSymbol}${item.amount.toLocaleString(undefined, {maximumFractionDigits: 2})} ${item.from}
+                  <span class="text-slate-400 mx-0.5">➔</span>
+                  <span class="text-brand-600 dark:text-brand-400">${toSymbol}${item.result.toLocaleString(undefined, {maximumFractionDigits: 2})} ${item.to}</span>
+                </div>
+                <div class="text-[9px] text-slate-400 dark:text-purple-400/40 mt-0.5">Rate: 1 ${item.from} = ${item.rate.toFixed(4)} ${item.to}</div>
+              </div>
+              
+              <div class="flex items-center gap-1 opacity-80 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="restoreHistoryItem(${index})" title="Load to Converter" class="p-1 text-slate-400 hover:text-brand-600 hover:bg-white dark:hover:bg-[#2a204e] rounded transition">
+                  <i data-lucide="corner-down-left" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteHistoryItem(${index})" title="Delete" class="p-1 text-slate-400 hover:text-rose-500 hover:bg-white dark:hover:bg-[#2a204e] rounded transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = innerHTML;
+      lucide.createIcons();
+    }
+
+    function restoreHistoryItem(index) {
+      playSound('click');
+      const list = getStoredHistory();
+      const item = list[index];
+      if (!item) return;
+
+      document.getElementById('amount').value = item.amount;
+      document.getElementById('fromCurrency').value = item.from;
+      document.getElementById('toCurrency').value = item.to;
+
+      updateSelectionBadges();
+      renderCalculation();
+      showToast(`Restored conversion parameter: ${item.id}`, 'info');
+    }
+
+    function deleteHistoryItem(index) {
+      playSound('delete');
+      const list = getStoredHistory();
+      list.splice(index, 1);
+      saveStoredHistory(list);
+      renderHistory();
+      showToast('Record deleted from ledger', 'info');
+    }
+
+    function clearAllHistory() {
+      playSound('delete');
+      saveStoredHistory([]);
+      renderHistory();
+      showToast('Wiped transaction ledger database', 'info');
+    }
+
+    function filterHistory() {
+      const searchVal = document.getElementById('historySearch').value.toLowerCase();
+      const items = document.querySelectorAll('#historyList > div');
+
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(searchVal)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      toast.className = `p-3.5 rounded-xl shadow-xl border text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto select-none`;
+      
+      let icon = 'info';
+      if (type === 'success') {
+        toast.className += ` bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30`;
+        icon = 'check-circle';
+      } else if (type === 'warning') {
+        toast.className += ` bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border-amber-100 dark:border-amber-900/30`;
+        icon = 'alert-triangle';
+      } else {
+        toast.className += ` bg-white dark:bg-[#120e25] text-slate-700 dark:text-purple-200 border-slate-200/80 dark:border-purple-950/40`;
+        icon = 'info';
+      }
+
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-4 h-4 flex-shrink-0"></i>
+        <span>${message}</span>
+      `;
+      
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 50);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => { toast.remove(); }, 300);
+      }, 3000);
     }
   </script>
+
 </body>
 </html>
