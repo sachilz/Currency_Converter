@@ -2,7 +2,7 @@ services:
   springboot-api:
     build: ./
     environment:
-      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI:-mongodb+srv://sachintha:tfeZO9gyWdb2PotC@cluster0.kgzqpei.mongodb.net/currency_db?appName=Cluster0}
+      - SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI:-mongodb+srv://dilshansachintha322_db_user:yIVjtiko5I2prZxv@fxexchange.ewzv1pj.mongodb.net/currency_db?appName=fxExchange}
     ports:
       - "8084:8084"
     expose:

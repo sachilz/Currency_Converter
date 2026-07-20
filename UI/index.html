@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ApexConvert — Converter & Ledger</title>
+  <title>ApexConvert — Minimalist Exchange Terminal</title>
   
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -12,13 +13,17 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f5f3ff',
-              100: '#ede9fe',
-              500: '#8b5cf6',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              900: '#4c1d95',
+            zinc: {
+              950: '#09090b',
+              900: '#18181b',
+              800: '#27272a',
+              700: '#3f3f46',
+              400: '#a1a1aa',
+              100: '#f4f4f5',
+            },
+            accent: {
+              500: '#6366f1', /* Indigo primary accent */
+              600: '#4f46e5',
             }
           }
         }
@@ -26,235 +31,284 @@
     }
   </script>
   
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
     body {
       font-family: 'Inter', sans-serif;
     }
-    .heading-font {
-      font-family: 'Outfit', sans-serif;
+    .mono-font {
+      font-family: 'JetBrains Mono', monospace;
     }
-    /* Scrollbar Aesthetics */
+    /* Simple Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 4px;
+      height: 4px;
     }
     ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .dark ::-webkit-scrollbar-thumb {
-      background: #2d1b4e;
-      border-radius: 10px;
+      background: #09090b;
     }
     ::-webkit-scrollbar-thumb {
-      background: #e2e8f0;
-      border-radius: 10px;
+      background: #27272a;
+      border-radius: 2px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #cbd5e1;
+      background: #3f3f46;
     }
   </style>
 </head>
 
-<body class="bg-slate-50 dark:bg-[#0b0813] text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen transition-colors duration-200 selection:bg-accent-600/30">
 
-  <header class="border-b border-slate-200/80 dark:border-purple-950/40 bg-white/70 dark:bg-[#0b0813]/70 backdrop-blur-md sticky top-0 z-40 transition-colors">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="p-2 bg-gradient-to-tr from-brand-600 to-indigo-500 rounded-xl shadow-lg shadow-brand-500/20 text-white">
-          <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+  <!-- Top Minimal Header -->
+  <header class="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="text-accent-500">
+          <i data-lucide="shuffle" class="w-5 h-5"></i>
         </div>
-        <div>
-          <span class="heading-font text-lg font-bold tracking-tight bg-gradient-to-r from-brand-600 to-indigo-500 dark:from-brand-400 dark:to-indigo-300 bg-clip-text text-transparent">ApexConvert</span>
-          <span class="text-[9px] block font-mono text-slate-400 dark:text-purple-400/60 -mt-1 uppercase tracking-widest">Lite Terminal</span>
+        <div class="flex items-baseline gap-2">
+          <span class="text-base font-bold tracking-tight text-zinc-100">ApexConvert</span>
+          <span class="text-[10px] text-zinc-500 font-mono tracking-widest uppercase">Engine v2.4</span>
         </div>
       </div>
 
-      <!-- Theme & Sound Toolbar controls -->
-      <div class="flex items-center gap-1.5">
-        <button id="soundToggle" onclick="toggleSound()" title="Toggle Sound Feedback"
-          class="p-2 rounded-xl border border-slate-200/60 dark:border-purple-950/50 bg-white dark:bg-[#130f24] text-slate-500 hover:text-brand-600 dark:text-purple-300 dark:hover:text-brand-400 transition-all active:scale-95">
-          <i id="soundIcon" data-lucide="volume-2" class="w-4 h-4"></i>
-        </button>
+      <!-- Quick status indicator & Toolbar -->
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex items-center gap-2 text-xs text-zinc-400 font-mono">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          <span>OFFLINE LEDGER ACTIVE</span>
+        </div>
+        
+        <div class="h-4 w-[1px] bg-zinc-800 hidden sm:block"></div>
 
-        <button onclick="toggleTheme()" title="Toggle Interface Mode"
-          class="p-2 rounded-xl border border-slate-200/60 dark:border-purple-950/50 bg-white dark:bg-[#130f24] text-slate-500 hover:text-brand-600 dark:text-purple-300 dark:hover:text-brand-400 transition-all active:scale-95">
-          <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
+        <button id="soundToggle" onclick="toggleSound()" title="Toggle Interface Audio Feedback"
+          class="p-2 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 active:scale-95 transition-all">
+          <i id="soundIcon" data-lucide="volume-2" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      
-      <!-- Left Card: The Converter Component -->
-      <div class="lg:col-span-7">
-        <div class="bg-white dark:bg-[#120e25] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-100 dark:shadow-none border border-slate-100 dark:border-purple-950/30 relative overflow-hidden">
-          
-          <!-- Abstract Background Decor -->
-          <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <!-- Main Grid Layout -->
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    
+    <!-- Flat Mini Metrics Strip -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="bg-zinc-900 p-4 rounded-lg border border-zinc-800/80">
+        <span class="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">Archived Volume</span>
+        <span id="metricVolume" class="text-sm font-bold tracking-tight text-zinc-200 block mt-1 mono-font">$0.00</span>
+      </div>
+      <div class="bg-zinc-900 p-4 rounded-lg border border-zinc-800/80">
+        <span class="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">Logged Transactions</span>
+        <span id="metricCount" class="text-sm font-bold tracking-tight text-zinc-200 block mt-1 mono-font">0</span>
+      </div>
+      <div class="bg-zinc-900 p-4 rounded-lg border border-zinc-800/80">
+        <span class="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">Primary Base</span>
+        <span id="metricBase" class="text-sm font-bold tracking-tight text-zinc-200 block mt-1">USD 🇺🇸</span>
+      </div>
+      <div class="bg-zinc-900 p-4 rounded-lg border border-zinc-800/80">
+        <span class="text-[10px] text-zinc-500 uppercase tracking-wider block font-medium">Direct Cross-rate</span>
+        <span id="metricRate" class="text-sm font-bold tracking-tight text-zinc-200 block mt-1 mono-font">300.50 LKR</span>
+      </div>
+    </div>
 
-          <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-purple-950/20">
+    <!-- Dual Column Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Left Column: Converter Core -->
+      <section class="lg:col-span-7 space-y-4">
+        
+        <!-- Standard Quick Channels -->
+        <div class="bg-zinc-900 p-3 rounded-lg border border-zinc-800 flex flex-wrap items-center gap-2">
+          <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mr-2">Preset Routing:</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="loadFastPair('USD', 'LKR')" class="px-2.5 py-1 text-xs font-medium rounded bg-zinc-800 border border-zinc-700/50 hover:bg-zinc-700 text-zinc-300 transition">
+              USD ➔ LKR
+            </button>
+            <button onclick="loadFastPair('EUR', 'USD')" class="px-2.5 py-1 text-xs font-medium rounded bg-zinc-800 border border-zinc-700/50 hover:bg-zinc-700 text-zinc-300 transition">
+              EUR ➔ USD
+            </button>
+            <button onclick="loadFastPair('GBP', 'EUR')" class="px-2.5 py-1 text-xs font-medium rounded bg-zinc-800 border border-zinc-700/50 hover:bg-zinc-700 text-zinc-300 transition">
+              GBP ➔ EUR
+            </button>
+            <button onclick="loadFastPair('USD', 'INR')" class="px-2.5 py-1 text-xs font-medium rounded bg-zinc-800 border border-zinc-700/50 hover:bg-zinc-700 text-zinc-300 transition">
+              USD ➔ INR
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Exchange Box -->
+        <div class="bg-zinc-900 rounded-lg p-5 sm:p-6 border border-zinc-800">
+          
+          <div class="flex items-center justify-between mb-5 pb-3 border-b border-zinc-800">
             <div class="flex items-center gap-2">
-              <i data-lucide="coins" class="w-5 h-5 text-brand-500"></i>
-              <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 heading-font">Global Exchange</h2>
+              <i data-lucide="calculator" class="w-4 h-4 text-zinc-400"></i>
+              <h2 class="text-sm font-bold tracking-tight text-zinc-200">Exchange Tool</h2>
             </div>
             
-            <button onclick="resetInputs()" class="text-xs text-slate-400 hover:text-brand-600 dark:text-purple-400 dark:hover:text-brand-300 flex items-center gap-1 transition py-1 px-2 hover:bg-slate-50 dark:hover:bg-[#1b1535] rounded-lg">
-              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+            <button onclick="resetInputs()" class="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1 transition">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Clear Inputs
             </button>
           </div>
 
-          <div class="mb-5">
-            <div class="flex flex-wrap gap-1.5">
-              <button onclick="loadFastPair('USD', 'LKR')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
-                🇺🇸 USD ➔ 🇱🇰 LKR
-              </button>
-              <button onclick="loadFastPair('EUR', 'USD')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
-                🇪🇺 EUR ➔ 🇺🇸 USD
-              </button>
-              <button onclick="loadFastPair('GBP', 'EUR')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
-                🇬🇧 GBP ➔ 🇪🇺 EUR
-              </button>
-              <button onclick="loadFastPair('USD', 'INR')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-50 hover:bg-brand-50 hover:text-brand-600 dark:bg-[#1a1433] dark:hover:bg-[#251d49] dark:text-purple-300 border border-slate-200/40 dark:border-purple-950/40 transition active:scale-95">
-                🇺🇸 USD ➔ 🇮🇳 INR
-              </button>
-            </div>
-          </div>
-
+          <!-- Fields Stack -->
           <div class="space-y-4">
+            
+            <!-- Amount block -->
             <div>
-              <label for="amount" class="block text-xs font-bold text-slate-500 dark:text-purple-400/80 uppercase tracking-wider mb-1.5">Amount to Exchange</label>
-              <div class="relative rounded-xl shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-purple-400">
-                  <span id="amountSymbol" class="font-mono text-base font-semibold">$</span>
+              <label for="amount" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Exchange Amount</label>
+              <div class="relative rounded-lg">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500 font-mono text-base">
+                  <span id="amountSymbol">$</span>
                 </div>
-                <input type="number" id="amount" placeholder="Enter amount..." required value="100" min="0.01" step="any" oninput="handleAmountInput()"
-                  class="w-full pl-9 pr-14 py-3.5 bg-slate-50/50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition duration-200 text-slate-800 dark:text-white font-semibold text-lg">
-                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                  <span id="fromBadge" class="text-xs font-bold bg-slate-200 dark:bg-[#2c2250] text-slate-600 dark:text-purple-200 px-2.5 py-1 rounded-md">USD</span>
+                <input type="number" id="amount" placeholder="0.00" required value="100" min="0.01" step="any" oninput="handleAmountInput()"
+                  class="w-full pl-8 pr-16 py-3 bg-zinc-950 border border-zinc-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 text-zinc-100 font-bold text-lg mono-font transition-all">
+                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+                  <span id="fromBadge" class="text-xs font-bold text-zinc-500 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded font-mono">USD</span>
                 </div>
               </div>
             </div>
 
-            <!-- Double dropdown list selectors and swap controls -->
-            <div class="grid grid-cols-1 md:grid-cols-9 gap-3 items-center pt-2">
+            <!-- Currency Drops Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-9 gap-2 items-center pt-2">
+              
+              <!-- Source Dropdown Wrapper -->
               <div class="md:col-span-4 relative">
-                <label for="fromCurrency" class="block text-xs font-bold text-slate-500 dark:text-purple-400/80 uppercase tracking-wider mb-1.5">Source Currency</label>
+                <label for="fromCurrency" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Source Asset</label>
                 <div class="relative">
                   <select id="fromCurrency" onchange="handleCurrencyChange()"
-                    class="w-full px-4 py-3 pl-11 bg-slate-50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-slate-800 dark:text-white font-semibold cursor-pointer appearance-none transition">
-                    <!-- Loaded dynamically via JS -->
+                    class="w-full px-3 py-2.5 pl-9 bg-zinc-950 border border-zinc-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 text-zinc-200 font-medium text-xs cursor-pointer appearance-none transition-all">
+                    <!-- Injected dynamically -->
                   </select>
-                  <div class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                    <span id="fromFlag" class="text-lg">🇺🇸</span>
+                  <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <span id="fromFlag" class="text-sm">🇺🇸</span>
                   </div>
-                  <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-purple-400">
-                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                   </div>
                 </div>
               </div>
 
-              <div class="md:col-span-1 flex justify-center py-1 md:pt-5">
-                <button onclick="swapCurrencies()" title="Swap Currencies"
-                  class="p-2.5 rounded-xl bg-brand-50 dark:bg-[#251d49] hover:bg-brand-100 dark:hover:bg-[#2f255c] text-brand-600 dark:text-purple-300 active:scale-90 hover:rotate-180 transition-all duration-300 border border-brand-100 dark:border-purple-950/50">
+              <!-- Swap Button -->
+              <div class="md:col-span-1 flex justify-center pt-3 md:pt-4">
+                <button onclick="swapCurrencies()" title="Invert Direction"
+                  class="p-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/50 active:scale-95 transition-all">
                   <i data-lucide="arrow-left-right" class="w-4 h-4 md:rotate-90"></i>
                 </button>
               </div>
 
+              <!-- Target Dropdown Wrapper -->
               <div class="md:col-span-4 relative">
-                <label for="toCurrency" class="block text-xs font-bold text-slate-500 dark:text-purple-400/80 uppercase tracking-wider mb-1.5">Target Currency</label>
+                <label for="toCurrency" class="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Target Asset</label>
                 <div class="relative">
                   <select id="toCurrency" onchange="handleCurrencyChange()"
-                    class="w-full px-4 py-3 pl-11 bg-slate-50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-slate-800 dark:text-white font-semibold cursor-pointer appearance-none transition">
-                    <!-- Loaded dynamically via JS -->
+                    class="w-full px-3 py-2.5 pl-9 bg-zinc-950 border border-zinc-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 text-zinc-200 font-medium text-xs cursor-pointer appearance-none transition-all">
+                    <!-- Injected dynamically -->
                   </select>
-                  <div class="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
-                    <span id="toFlag" class="text-lg">🇱🇰</span>
+                  <div class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <span id="toFlag" class="text-sm">🇱🇰</span>
                   </div>
-                  <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-purple-400">
-                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                  <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 
-          <div class="mt-8 bg-gradient-to-r from-slate-50 to-indigo-50/10 dark:from-[#1b1535]/50 dark:to-transparent p-5 rounded-2xl border border-slate-100 dark:border-purple-950/40">
-            <div class="flex items-center justify-between mb-2.5">
-              <span class="text-xs font-bold text-slate-400 dark:text-purple-400/60 uppercase tracking-widest">Calculated Outcome</span>
-              <span id="rateLabel" class="text-[10px] bg-indigo-50 dark:bg-[#2c2250] text-indigo-600 dark:text-purple-300 px-2 py-0.5 rounded-full font-mono font-semibold">1 FROM = X TO</span>
+          <!-- Clean calculation outputs block -->
+          <div class="mt-6 bg-zinc-950 p-4 rounded-lg border border-zinc-800/80">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Active Calculations</span>
+              <span id="rateLabel" class="text-[10px] font-mono text-accent-500 font-semibold bg-accent-500/10 px-2 py-0.5 rounded">1 FROM = X TO</span>
             </div>
             
-            <div id="outputArea" class="flex flex-col gap-1 min-h-[60px] justify-center">
-              <!-- Dynamically rendered calculation result -->
+            <div id="outputArea" class="flex flex-col gap-1 min-h-[50px] justify-center">
+              <!-- JS-populated result calculations -->
             </div>
           </div>
 
-          <!-- CTA to save results into local history -->
-          <div class="mt-6">
+          <!-- Flat Primary Trigger -->
+          <div class="mt-4">
             <button onclick="commitAndSaveConversion()"
-              class="w-full bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
-              <i data-lucide="save" class="w-4 h-4"></i>
-              Save & Log to History
+              class="w-full bg-accent-600 hover:bg-accent-700 active:scale-[0.99] text-zinc-100 font-semibold py-3 px-4 rounded-lg text-xs transition duration-150 flex items-center justify-center gap-1.5 border border-accent-500/20">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+              Post Ledger Entry
             </button>
           </div>
 
         </div>
-      </div>
 
-      <div class="lg:col-span-5">
-        <div class="bg-white dark:bg-[#120e25] rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-100 dark:shadow-none border border-slate-100 dark:border-purple-950/30">
+        <!-- Global Parity Indices Mini-Grid -->
+        <div class="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Live Global Parity Index</span>
+            <span class="text-[9px] text-zinc-500 font-mono" id="parityBaseBadge">BASE: USD</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="parityGrid">
+            <!-- Loaded dynamically via JavaScript -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Ledger Index -->
+      <section class="lg:col-span-5">
+        <div class="bg-zinc-900 rounded-lg p-5 border border-zinc-800">
           
-          <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 dark:border-purple-950/20">
+          <!-- History Header -->
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800">
             <div>
               <div class="flex items-center gap-2">
-                <i data-lucide="history" class="w-5 h-5 text-brand-500"></i>
-                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 heading-font">Transaction Ledger</h3>
+                <i data-lucide="database" class="w-4 h-4 text-zinc-400"></i>
+                <h3 class="text-sm font-bold tracking-tight text-zinc-200">Ledger Archive</h3>
               </div>
-              <p class="text-xs text-slate-400 dark:text-purple-400/50 mt-0.5" id="historyCounter">0 saved records</p>
+              <p class="text-[10px] text-zinc-500 mt-0.5" id="historyCounter">0 logs archived</p>
             </div>
             
-            <button onclick="clearAllHistory()" title="Clear Entire Ledger"
-              class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-all">
+            <button onclick="clearAllHistory()" title="Wipe Entire Ledger File"
+              class="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-zinc-800 rounded transition-all">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
 
-          <!-- History Filter Box -->
-          <div class="mb-4 relative">
-            <input type="text" id="historySearch" oninput="filterHistory()" placeholder="Search history records..."
-              class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#1b1535] border border-slate-200 dark:border-purple-950/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-xs text-slate-600 dark:text-purple-300">
-            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-purple-400/60 pointer-events-none">
+          <!-- Minimal Filtering Input -->
+          <div class="mb-3 relative">
+            <input type="text" id="historySearch" oninput="filterHistory()" placeholder="Search transactions..."
+              class="w-full pl-8 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent-500 text-xs text-zinc-300 transition-all">
+            <div class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none">
               <i data-lucide="search" class="w-3.5 h-3.5"></i>
             </div>
           </div>
 
-          <!-- Stored list ledger container -->
-          <div class="max-h-[380px] overflow-y-auto space-y-2.5 pr-1" id="historyList">
-            <!-- Populated via JavaScript dynamically -->
+          <!-- Ledger entry stack -->
+          <div class="max-h-[380px] overflow-y-auto space-y-2 pr-1" id="historyList">
+            <!-- Dynamic list items populate here -->
           </div>
 
         </div>
-      </div>
+      </section>
 
     </div>
   </main>
 
-  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+  <!-- Notification Toaster -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-xs w-full"></div>
 
   <script>
     let soundEnabled = true;
 
-    // Rich currency definitions, flags, and offline fallback conversion index (to USD equivalent)
+    // Flat baseline metadata parameters mapped by key values
     const CURRENCY_METADATA = {
-      USD: { flag: '🇺🇸', name: 'United States Dollar', symbol: '$', rateToUSD: 1.0 },
+      USD: { flag: '🇺🇸', name: 'US Dollar', symbol: '$', rateToUSD: 1.0 },
       LKR: { flag: '🇱🇰', name: 'Sri Lankan Rupee', symbol: 'Rs', rateToUSD: 300.5 },
       EUR: { flag: '🇪🇺', name: 'Euro', symbol: '€', rateToUSD: 0.92 },
-      GBP: { flag: '🇬🇧', name: 'British Pound Sterling', symbol: '£', rateToUSD: 0.78 },
+      GBP: { flag: '🇬🇧', name: 'British Pound', symbol: '£', rateToUSD: 0.78 },
       INR: { flag: '🇮🇳', name: 'Indian Rupee', symbol: '₹', rateToUSD: 83.4 },
       JPY: { flag: '🇯🇵', name: 'Japanese Yen', symbol: '¥', rateToUSD: 155.2 },
       AUD: { flag: '🇦🇺', name: 'Australian Dollar', symbol: 'A$', rateToUSD: 1.51 },
@@ -264,9 +318,8 @@
     };
 
     const CONVERT_URL = '/api/convert';
-    const WARNING_URL = '/api/warning-check';
 
-    // Interactive audio synthesizer using Web Audio API
+    // Simple, solid Web Audio Synthesizer interface (Tactile sound feedback)
     function playSound(type) {
       if (!soundEnabled) return;
       try {
@@ -279,43 +332,44 @@
         
         if (type === 'click') {
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(420, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(700, ctx.currentTime + 0.12);
-          gain.gain.setValueAtTime(0.06, ctx.currentTime);
+          osc.frequency.setValueAtTime(400, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.08);
+          gain.gain.setValueAtTime(0.03, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.08);
+        } else if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500, ctx.currentTime); 
+          osc.frequency.setValueAtTime(650, ctx.currentTime + 0.06); 
+          gain.gain.setValueAtTime(0.04, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.2);
+        } else if (type === 'delete') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.03, ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
           osc.start();
           osc.stop(ctx.currentTime + 0.12);
-        } else if (type === 'success') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, ctx.currentTime); 
-          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08); 
-          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16); 
-          gain.gain.setValueAtTime(0.08, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.35);
-        } else if (type === 'delete') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(180, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + 0.15);
-          gain.gain.setValueAtTime(0.05, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.15);
         }
       } catch (e) {
         console.warn('Audio output bypassed.', e);
       }
     }
 
+    // Window Init Routine
     window.onload = function() {
       lucide.createIcons();
       populateDropdowns();
-      initializeTheme();
       renderCalculation();
       renderHistory();
+      renderParityGrid();
     };
 
+    // Populate simplified dark dropdown elements
     function populateDropdowns() {
       const fromSelect = document.getElementById('fromCurrency');
       const toSelect = document.getElementById('toCurrency');
@@ -324,71 +378,24 @@
       toSelect.innerHTML = '';
 
       Object.keys(CURRENCY_METADATA).forEach(key => {
+        const item = CURRENCY_METADATA[key];
         const optionFrom = document.createElement('option');
         optionFrom.value = key;
-        optionFrom.innerHTML = `${key} — ${CURRENCY_METADATA[key].name}`;
+        optionFrom.className = "bg-zinc-950 text-zinc-100 font-mono text-xs";
+        optionFrom.innerText = `${key} — ${item.name}`;
         fromSelect.appendChild(optionFrom);
 
         const optionTo = document.createElement('option');
         optionTo.value = key;
-        optionTo.innerHTML = `${key} — ${CURRENCY_METADATA[key].name}`;
+        optionTo.className = "bg-zinc-950 text-zinc-100 font-mono text-xs";
+        optionTo.innerText = `${key} — ${item.name}`;
         toSelect.appendChild(optionTo);
       });
 
-      // Standard initial selection setup
       fromSelect.value = 'USD';
       toSelect.value = 'LKR';
       
       updateSelectionBadges();
-    }
-
-    // Toggle custom sound indicators
-    function toggleSound() {
-      soundEnabled = !soundEnabled;
-      const iconElement = document.getElementById('soundIcon');
-      if (soundEnabled) {
-        iconElement.setAttribute('data-lucide', 'volume-2');
-        showToast('Tactile Sound Alerts Enabled', 'info');
-        playSound('click');
-      } else {
-        iconElement.setAttribute('data-lucide', 'volume-x');
-        showToast('Tactile Sound Muted', 'info');
-      }
-      lucide.createIcons();
-    }
-
-    // Theme Managers
-    function toggleTheme() {
-      playSound('click');
-      const doc = document.documentElement;
-      const themeIcon = document.getElementById('themeIcon');
-      if (doc.classList.contains('dark')) {
-        doc.classList.remove('dark');
-        themeIcon.setAttribute('data-lucide', 'moon');
-        localStorage.setItem('theme', 'light');
-        showToast('Vibrant Light UI Mode Active', 'info');
-      } else {
-        doc.classList.add('dark');
-        themeIcon.setAttribute('data-lucide', 'sun');
-        localStorage.setItem('theme', 'dark');
-        showToast('Deep Dark UI Mode Active', 'info');
-      }
-      lucide.createIcons();
-    }
-
-    function initializeTheme() {
-      const savedTheme = localStorage.getItem('theme');
-      const themeIcon = document.getElementById('themeIcon');
-      const doc = document.documentElement;
-      
-      if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        doc.classList.add('dark');
-        themeIcon.setAttribute('data-lucide', 'sun');
-      } else {
-        doc.classList.remove('dark');
-        themeIcon.setAttribute('data-lucide', 'moon');
-      }
-      lucide.createIcons();
     }
 
     function updateSelectionBadges() {
@@ -399,8 +406,15 @@
       document.getElementById('toFlag').innerText = CURRENCY_METADATA[toVal].flag;
       document.getElementById('amountSymbol').innerText = CURRENCY_METADATA[fromVal].symbol;
       document.getElementById('fromBadge').innerText = fromVal;
+      document.getElementById('parityBaseBadge').innerText = `BASE: ${fromVal}`;
+
+      // Sync the inline metrics banner states
+      document.getElementById('metricBase').innerText = `${fromVal} ${CURRENCY_METADATA[fromVal].flag}`;
+      const crossRate = calculateCrossRate(fromVal, toVal, 1).rate;
+      document.getElementById('metricRate').innerText = `${crossRate.toFixed(2)} ${toVal}`;
     }
 
+    // Events Handlers
     function handleAmountInput() {
       renderCalculation();
     }
@@ -409,6 +423,7 @@
       playSound('click');
       updateSelectionBadges();
       renderCalculation();
+      renderParityGrid();
     }
 
     function swapCurrencies() {
@@ -416,11 +431,13 @@
       const fromSelect = document.getElementById('fromCurrency');
       const toSelect = document.getElementById('toCurrency');
       const temp = fromSelect.value;
+      
       fromSelect.value = toSelect.value;
       toSelect.value = temp;
 
       updateSelectionBadges();
       renderCalculation();
+      renderParityGrid();
     }
 
     function calculateCrossRate(from, to, amount) {
@@ -444,8 +461,10 @@
       document.getElementById('amount').value = "100";
       document.getElementById('fromCurrency').value = "USD";
       document.getElementById('toCurrency').value = "LKR";
+      
       updateSelectionBadges();
       renderCalculation();
+      renderParityGrid();
       showToast('Converter parameters reset', 'info');
     }
 
@@ -453,10 +472,28 @@
       playSound('click');
       document.getElementById('fromCurrency').value = from;
       document.getElementById('toCurrency').value = to;
+      
       updateSelectionBadges();
       renderCalculation();
+      renderParityGrid();
     }
 
+    // Toggle Sound Option
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const iconElement = document.getElementById('soundIcon');
+      if (soundEnabled) {
+        iconElement.setAttribute('data-lucide', 'volume-2');
+        showToast('Synth audio feedback active', 'info');
+        playSound('click');
+      } else {
+        iconElement.setAttribute('data-lucide', 'volume-x');
+        showToast('Synth audio feedback muted', 'info');
+      }
+      lucide.createIcons();
+    }
+
+    // Main Display rendering computations
     function renderCalculation() {
       const amountInput = parseFloat(document.getElementById('amount').value);
       const fromVal = document.getElementById('fromCurrency').value;
@@ -465,41 +502,64 @@
 
       if (isNaN(amountInput) || amountInput <= 0) {
         outputArea.innerHTML = `
-          <div class="text-rose-500 font-semibold flex items-center gap-2 justify-center text-xs">
-            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-            <span>Please input a positive non-zero numeric amount.</span>
+          <div class="text-red-400 font-mono text-xs flex items-center gap-1.5 justify-center py-2">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            <span>INPUT A POSITIVE NUMERIC VALUE</span>
           </div>`;
         lucide.createIcons();
         return;
       }
 
       const calc = calculateCrossRate(fromVal, toVal, amountInput);
-      
       const formattedAmount = amountInput.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const formattedResult = calc.result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
       
       document.getElementById('rateLabel').innerText = `1 ${fromVal} = ${calc.rate.toFixed(4)} ${toVal}`;
 
       outputArea.innerHTML = `
-        <div class="text-slate-400 dark:text-purple-400/50 text-[10px] font-bold uppercase tracking-wider">${formattedAmount} ${fromVal} equals</div>
-        <div class="text-xl md:text-2xl font-extrabold text-brand-600 dark:text-brand-400 tracking-tight heading-font">
-          ${CURRENCY_METADATA[toVal].symbol} ${formattedResult} <span class="text-sm font-bold text-slate-400 dark:text-purple-400/50 ml-1">${toVal}</span>
+        <span class="text-zinc-500 font-mono text-[9px] uppercase tracking-wider block">${formattedAmount} ${fromVal} equivalent rate</span>
+        <div class="text-xl font-bold tracking-tight text-zinc-100 mt-0.5">
+          <span class="mono-font">${CURRENCY_METADATA[toVal].symbol} ${formattedResult}</span>
+          <span class="text-xs text-zinc-500 font-mono font-medium ml-1 bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">${toVal}</span>
         </div>
       `;
 
-      // Big Volume Flag dynamic alert check
+      // Threshold reporting limits check
       const checkInUSD = amountInput / CURRENCY_METADATA[fromVal].rateToUSD;
       if (checkInUSD >= 5000) {
         outputArea.innerHTML += `
-          <div class="mt-2.5 p-2 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 rounded-lg text-[10px] flex items-center gap-1.5 font-medium">
+          <div class="mt-2 p-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 rounded text-[10px] font-mono flex items-center gap-1.5">
             <i data-lucide="shield-alert" class="w-3.5 h-3.5 flex-shrink-0"></i>
-            <span>Compliancy threshold warning: Transaction exceeds 5K USD equivalent limit.</span>
+            <span>EXCEEDS $5K USD MONITORING THRESHOLD</span>
           </div>
         `;
         lucide.createIcons();
       }
     }
 
+    function renderParityGrid() {
+      const grid = document.getElementById('parityGrid');
+      grid.innerHTML = '';
+      
+      const fromVal = document.getElementById('fromCurrency').value;
+      const comparisonList = ['USD', 'EUR', 'GBP', 'JPY', 'INR', 'LKR'].filter(cur => cur !== fromVal).slice(0, 4);
+      
+      comparisonList.forEach(target => {
+        const calc = calculateCrossRate(fromVal, target, 1);
+        const card = document.createElement('div');
+        card.className = "p-2 bg-zinc-950 border border-zinc-800 rounded flex flex-col justify-between";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-zinc-400">${CURRENCY_METADATA[target].flag} ${target}</span>
+            <span class="text-[9px] text-zinc-600 font-mono font-bold">${CURRENCY_METADATA[target].symbol}</span>
+          </div>
+          <div class="mt-1 text-xs font-bold text-zinc-200 font-mono tracking-tight">${calc.rate.toFixed(3)}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Ledger Engine Actions
     function getStoredHistory() {
       const items = localStorage.getItem('apex_lite_history');
       return items ? JSON.parse(items) : [];
@@ -507,25 +567,38 @@
 
     function saveStoredHistory(list) {
       localStorage.setItem('apex_lite_history', JSON.stringify(list));
+      syncLedgerMetrics(list);
     }
 
-    // Log the transaction values
+    function syncLedgerMetrics(list) {
+      document.getElementById('metricCount').innerText = list.length;
+      
+      let totalUSD = 0;
+      list.forEach(item => {
+        const rateToUSD = CURRENCY_METADATA[item.from]?.rateToUSD || 1.0;
+        totalUSD += (item.amount / rateToUSD);
+      });
+      
+      document.getElementById('metricVolume').innerText = `$${totalUSD.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    // Archive Conversion to local store ledger
     async function commitAndSaveConversion() {
       const amountInput = parseFloat(document.getElementById('amount').value);
       const fromVal = document.getElementById('fromCurrency').value;
       const toVal = document.getElementById('toCurrency').value;
 
       if (isNaN(amountInput) || amountInput <= 0) {
-        showToast('Please provide a valid conversion target', 'warning');
+        showToast('Provide a valid non-zero amount to store', 'warning');
         return;
       }
 
       const calc = calculateCrossRate(fromVal, toVal, amountInput);
       
       let systemId = 'TX-' + Math.floor(100000 + Math.random() * 900000);
-      let timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' + new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
+      let timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' | ' + new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-      // Live Fetch/Simulator bridge
+      // Simulator bridge
       try {
         const res = await fetch(`${CONVERT_URL}?amount=${amountInput}&from=${fromVal}&to=${toVal}`, {
           method: 'POST',
@@ -537,8 +610,7 @@
           timestamp = apiResponse.timestamp || timestamp;
         }
       } catch (err) {
-        // Safe interactive fallback
-        console.warn("Dev mode fallback active.");
+        // Safe offline sandbox operations 
       }
 
       const currentList = getStoredHistory();
@@ -556,8 +628,7 @@
       saveStoredHistory(currentList);
       
       playSound('success');
-      showToast(`Logged successfully to ledger!`, 'success');
-      
+      showToast(`Logged successfully: ${systemId}`, 'success');
       renderHistory();
     }
 
@@ -566,16 +637,17 @@
       const container = document.getElementById('historyList');
       const counterLabel = document.getElementById('historyCounter');
       
-      counterLabel.innerText = `${list.length} saved transaction entries`;
+      counterLabel.innerText = `${list.length} transactions stored`;
+      syncLedgerMetrics(list);
 
       if (list.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-10 text-slate-400 dark:text-purple-400/40">
-            <div class="w-10 h-10 bg-slate-50 dark:bg-[#1b1535] rounded-full flex items-center justify-center mx-auto mb-3">
-              <i data-lucide="database-backup" class="w-5 h-5 text-slate-300 dark:text-purple-400/40"></i>
+          <div class="text-center py-8 text-zinc-600">
+            <div class="w-8 h-8 bg-zinc-950 rounded-full flex items-center justify-center mx-auto mb-2.5">
+              <i data-lucide="database" class="w-4 h-4 text-zinc-700"></i>
             </div>
-            <p class="text-xs font-medium">No recorded transactions.</p>
-            <p class="text-[10px] text-slate-400/80 dark:text-purple-400/30 mt-0.5">Use the save button to log conversions here.</p>
+            <p class="text-xs font-mono">Archive is empty</p>
+            <p class="text-[9px] text-zinc-500 mt-1">Calculations will record here on post</p>
           </div>
         `;
         lucide.createIcons();
@@ -588,27 +660,27 @@
         const toSymbol = CURRENCY_METADATA[item.to]?.symbol || '';
 
         innerHTML += `
-          <div class="p-3 bg-slate-50 hover:bg-slate-100/50 dark:bg-[#1a1433] dark:hover:bg-[#20193e] border border-slate-100 dark:border-purple-950/40 rounded-xl flex flex-col justify-between gap-1.5 group transition-all">
+          <div class="p-3 bg-zinc-950 border border-zinc-800/80 rounded hover:border-zinc-700 group transition-all flex flex-col gap-1">
             <div class="flex items-center justify-between">
-              <span class="font-mono text-[9px] bg-slate-200/50 dark:bg-[#2a204e] text-slate-500 dark:text-purple-300 px-1.5 py-0.5 rounded font-bold">${item.id}</span>
-              <span class="text-[9px] text-slate-400 dark:text-purple-400/50">${item.timestamp}</span>
+              <span class="font-mono text-[9px] bg-zinc-900 text-zinc-400 border border-zinc-800 px-1.5 py-0.5 rounded font-bold">${item.id}</span>
+              <span class="text-[9px] text-zinc-500 font-mono">${item.timestamp}</span>
             </div>
             
-            <div class="flex items-center justify-between gap-2">
-              <div class="cursor-pointer flex-1" onclick="restoreHistoryItem(${index})" title="Click to load back into converter">
-                <div class="text-xs font-bold text-slate-700 dark:text-purple-100">
-                  ${fromSymbol}${item.amount.toLocaleString(undefined, {maximumFractionDigits: 2})} ${item.from}
-                  <span class="text-slate-400 mx-0.5">➔</span>
-                  <span class="text-brand-600 dark:text-brand-400">${toSymbol}${item.result.toLocaleString(undefined, {maximumFractionDigits: 2})} ${item.to}</span>
+            <div class="flex items-center justify-between gap-2 mt-1">
+              <div class="cursor-pointer flex-1" onclick="restoreHistoryItem(${index})" title="Click to load into calculations">
+                <div class="text-xs font-bold text-zinc-300">
+                  <span class="mono-font">${fromSymbol}${item.amount.toLocaleString(undefined, {maximumFractionDigits: 2})}</span> 
+                  <span class="text-zinc-500 font-normal">➔</span>
+                  <span class="text-accent-500 mono-font">${toSymbol}${item.result.toLocaleString(undefined, {maximumFractionDigits: 2})}</span>
                 </div>
-                <div class="text-[9px] text-slate-400 dark:text-purple-400/40 mt-0.5">Rate: 1 ${item.from} = ${item.rate.toFixed(4)} ${item.to}</div>
+                <div class="text-[9px] text-zinc-500 font-mono mt-0.5">Rate: 1 ${item.from} = ${item.rate.toFixed(4)} ${item.to}</div>
               </div>
               
-              <div class="flex items-center gap-1 opacity-80 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onclick="restoreHistoryItem(${index})" title="Load to Converter" class="p-1 text-slate-400 hover:text-brand-600 hover:bg-white dark:hover:bg-[#2a204e] rounded transition">
+              <div class="flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onclick="restoreHistoryItem(${index})" title="Restore Parameters" class="p-1 text-zinc-400 hover:text-accent-500 hover:bg-zinc-900 rounded transition">
                   <i data-lucide="corner-down-left" class="w-3.5 h-3.5"></i>
                 </button>
-                <button onclick="deleteHistoryItem(${index})" title="Delete" class="p-1 text-slate-400 hover:text-rose-500 hover:bg-white dark:hover:bg-[#2a204e] rounded transition">
+                <button onclick="deleteHistoryItem(${index})" title="Delete entry" class="p-1 text-zinc-400 hover:text-red-400 hover:bg-zinc-900 rounded transition">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
@@ -633,7 +705,8 @@
 
       updateSelectionBadges();
       renderCalculation();
-      showToast(`Restored conversion parameter: ${item.id}`, 'info');
+      renderParityGrid();
+      showToast(`Loaded details for: ${item.id}`, 'info');
     }
 
     function deleteHistoryItem(index) {
@@ -642,14 +715,14 @@
       list.splice(index, 1);
       saveStoredHistory(list);
       renderHistory();
-      showToast('Record deleted from ledger', 'info');
+      showToast('Record deleted from local ledger', 'info');
     }
 
     function clearAllHistory() {
       playSound('delete');
       saveStoredHistory([]);
       renderHistory();
-      showToast('Wiped transaction ledger database', 'info');
+      showToast('Ledger wiped completely', 'info');
     }
 
     function filterHistory() {
@@ -666,21 +739,22 @@
       });
     }
 
+    // Modern clean minimal status alerts Toaster
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       
-      toast.className = `p-3.5 rounded-xl shadow-xl border text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto select-none`;
+      toast.className = `p-3 rounded border text-xs font-semibold font-mono flex items-center gap-2 transition-all duration-200 transform translate-y-1 opacity-0 pointer-events-auto select-none`;
       
       let icon = 'info';
       if (type === 'success') {
-        toast.className += ` bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30`;
+        toast.className += ` bg-zinc-900 text-emerald-400 border-emerald-500/20`;
         icon = 'check-circle';
       } else if (type === 'warning') {
-        toast.className += ` bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border-amber-100 dark:border-amber-900/30`;
+        toast.className += ` bg-zinc-900 text-amber-500 border-amber-500/20`;
         icon = 'alert-triangle';
       } else {
-        toast.className += ` bg-white dark:bg-[#120e25] text-slate-700 dark:text-purple-200 border-slate-200/80 dark:border-purple-950/40`;
+        toast.className += ` bg-zinc-900 text-zinc-300 border-zinc-800`;
         icon = 'info';
       }
 
@@ -693,13 +767,13 @@
       lucide.createIcons();
 
       setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 50);
+        toast.classList.remove('translate-y-1', 'opacity-0');
+      }, 30);
 
       setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => { toast.remove(); }, 300);
-      }, 3000);
+        toast.classList.add('opacity-0', 'translate-y-1');
+        setTimeout(() => { toast.remove(); }, 200);
+      }, 2500);
     }
   </script>
 

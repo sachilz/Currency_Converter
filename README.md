@@ -165,6 +165,7 @@ In `src/main/resources/application.properties`:
 
 ```properties
 spring.data.mongodb.uri=mongodb://localhost:27017/currency_db
+spring.data.mongodb.database=currency_db
 server.port=8084
 ```
 
